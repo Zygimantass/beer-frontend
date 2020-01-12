@@ -1,5 +1,6 @@
 import React from 'react';
 import { Table, Alert, Tabs, Tab } from 'react-bootstrap';
+import './ResultTable.css';
 
 class ResultTable extends React.Component {
     constructor(props) {
@@ -33,7 +34,6 @@ class ResultTable extends React.Component {
                 this.props.onFinishLoad();
             })
             .catch((error) => {
-                console.log(error)
                 this.setState({
                     loaded: true,
                     error: "Failed to fetch data from service"
@@ -48,6 +48,8 @@ class ResultTable extends React.Component {
         if (this.props.loading || !this.state.loaded) {
             return (<div/>)
         }
+
+        console.log(this.state.data.points.map((point) => point.location.latitude.toString() + "+" + point.location.longitude.toString() + "/"))
 
         if (this.state.error !== "") {
             return (
@@ -66,6 +68,7 @@ class ResultTable extends React.Component {
                             <li><b>Fuel used:</b> {Math.round(this.state.data.fuelUsed * 10) / 10}</li>
                             <li><b>Breweries visited:</b> {this.state.data.points.length - 2}</li>
                             <li><b>Beers tasted:</b> {this.state.data.beerCount}</li>
+                            <li><a href={"https://www.google.com/maps/dir/" + this.state.data.points.map((point) => point.location.latitude.toString() + "+" + point.location.longitude.toString() + "/").reduce((acc, c) => (acc + c))}>Link to Google Maps</a></li>
                         </ul>
                     </Tab>
                     <Tab eventKey="breweries" title="Breweries">
@@ -81,7 +84,7 @@ class ResultTable extends React.Component {
                             <tbody>
                             {this.state.data.points.map(
                                 ((point, index) => (
-                                    <tr>
+                                    <tr key={index}>
                                         <td>
                                             {index}
                                         </td>
@@ -96,11 +99,18 @@ class ResultTable extends React.Component {
                                         </td>
                                     </tr>
                                 ))
-                            )
-
-                            }
+                            )}
                             </tbody>
                         </Table>
+                    </Tab>
+                    <Tab eventKey="beerTypes" title="Beers tasted">
+                        <ul>
+                            {this.state.data.beerTypes.map(
+                                ((beerType, index) => (
+                                    <li key={index}>{beerType}</li>
+                                ))
+                            )}
+                        </ul>
                     </Tab>
                 </Tabs>
 
