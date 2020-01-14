@@ -50,8 +50,6 @@ class ResultTable extends React.Component {
             return (<div/>)
         }
 
-        console.log(this.state.data.points.map((point) => point.location.latitude.toString() + "+" + point.location.longitude.toString() + "/"))
-
         if (this.state.error !== "") {
             return (
                 <Alert variant='danger'>
