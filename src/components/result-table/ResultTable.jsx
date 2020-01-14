@@ -22,7 +22,8 @@ class ResultTable extends React.Component {
     }
 
     loadData(lat, lon) {
-        fetch("http://localhost:7777/api/v1/trip/find?lat=" + lat + "&lon=" + lon)
+        let ip = process.env.REACT_APP_BACKEND_IP || "localhost";
+        fetch("http://" + ip + ":7777/api/v1/trip/find?lat=" + lat + "&lon=" + lon)
             .then(res => res.json())
             .then((result) => {
                 this.setState({
