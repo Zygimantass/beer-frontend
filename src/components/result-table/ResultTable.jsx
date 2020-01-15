@@ -24,9 +24,14 @@ class ResultTable extends React.Component {
     loadData(lat, lon) {
         let ip = process.env.REACT_APP_BACKEND_IP || "localhost";
         fetch("http://" + ip + ":7777/api/v1/trip/find?lat=" + lat + "&lon=" + lon)
-            .then(res => res.json())
+		    .then(res => {
+				if (res.ok) return res.json()
+				
+				throw res;
+		    })
             .then((result) => {
-                this.setState({
+				console.log(result)
+				this.setState({
                     loaded: true,
                     error: "",
                     data: result,
@@ -35,11 +40,21 @@ class ResultTable extends React.Component {
                 this.props.onFinishLoad();
             })
             .catch((error) => {
-                this.setState({
-                    loaded: true,
-                    error: "Failed to fetch data from service"
-                });
-
+				console.log(error)
+				if (typeof error.text === 'function') {
+						error.text().then(msg => {
+								this.setState({
+										loaded: true,
+										error: msg,
+										data: {},
+								})
+						})
+				} else {
+						this.setState({
+							loaded: true,
+							error: "Failed to fetch data from service"
+						});
+				}
                 this.props.onFinishLoad();
             });
     }
@@ -56,7 +71,15 @@ class ResultTable extends React.Component {
                     {this.state.error}
                 </Alert>
             );
-        }
+		}
+
+		if (this.state.data.beerCount === 0) {
+		    return (
+				<Alert variant='warning'>
+						Could not find a suitable route
+				</Alert>
+			);
+		}
 
         return (
             <div>
@@ -64,7 +87,7 @@ class ResultTable extends React.Component {
                 <Tabs defaultActiveKey="summary" id="route-tabs">
                     <Tab eventKey="summary" title="Summary">
                         <ul>
-                            <li><b>Fuel used:</b> {Math.round(this.state.data.fuelUsed * 10) / 10}</li>
+                            <li><b>Kilometres travelled:</b> {Math.round(this.state.data.fuelUsed * 10) / 10} km</li>
                             <li><b>Breweries visited:</b> {this.state.data.points.length - 2}</li>
                             <li><b>Beers tasted:</b> {this.state.data.beerCount}</li>
                             <li><a href={"https://www.google.com/maps/dir/" + this.state.data.points.map((point) => point.location.latitude.toString() + "+" + point.location.longitude.toString() + "/").reduce((acc, c) => (acc + c))}>Link to Google Maps</a></li>
